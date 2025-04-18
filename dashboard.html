@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TrustChain</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/techno-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Hexagonal Background Pattern -->
+    <div class="hexagon-bg"></div>
+
+    <div class="dashboard-container">
+        <!-- Techno-Minimalist Sidebar -->
+        <aside class="sidebar tech-sidebar">
+            <div class="sidebar-header">
+                <h2><span class="mono-text">TRUST</span>CHAIN</h2>
+                <div class="status-container">
+                    <span class="status-indicator status-active"></span>
+                    <span class="mono-text">NETWORK ACTIVE</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="tech-nav-item active">
+                        <a href="dashboard.html">
+                            <i class="fas fa-th-large"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="tech-nav-item">
+                        <a href="#credentials">
+                            <i class="fas fa-certificate"></i>
+                            <span>Credentials</span>
+                        </a>
+                    </li>
+                    <li class="tech-nav-item">
+                        <a href="#verification">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Verification</span>
+                        </a>
+                    </li>
+                    <li class="tech-nav-item">
+                        <a href="#transactions">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Transactions</span>
+                        </a>
+                    </li>
+                    <li class="tech-nav-item">
+                        <a href="#network">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>Network</span>
+                        </a>
+                    </li>
+                    <li class="tech-nav-item">
+                        <a href="#settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile tech-accent-border">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <p id="user-name" class="mono-text">Loading...</p>
+                        <p class="user-role">Credential Holder</p>
+                    </div>
+                </div>
+                <button id="logout-btn" class="tech-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content tech-main-content">
+            <header class="dashboard-header angular-card">
+                <div class="header-left">
+                    <button id="toggle-sidebar" class="tech-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="tech-heading">System Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="system-status">
+                        <span class="data-indicator"><i class="fas fa-shield-alt"></i> System Secure</span>
+                        <span class="data-indicator mono-text"><i class="fas fa-clock"></i> <span id="current-time"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                <!-- Welcome Section -->
+                <section class="welcome-section tech-card">
+                    <h2 class="tech-heading">Welcome to <span class="mono-text">TRUST</span>CHAIN</h2>
+                    <p>Manage your digital credentials and verify others' credentials using our secure blockchain infrastructure.</p>
+                    <div class="system-metrics">
+                        <div class="metric">
+                            <span class="metric-value mono-text">99.9%</span>
+                            <span class="metric-label">System Uptime</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-value mono-text">3ms</span>
+                            <span class="metric-label">Response Time</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-value mono-text">256-bit</span>
+                            <span class="metric-label">Encryption</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Stats Grid -->
+                <div class="stats-container">
+                    <div class="stat-card tech-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>My Credentials</h3>
+                            <p class="stat-count mono-text">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card tech-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Shared</h3>
+                            <p class="stat-count mono-text">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card tech-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Verified</h3>
+                            <p class="stat-count mono-text">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card tech-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Pending</h3>
+                            <p class="stat-count mono-text">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <section class="quick-actions">
+                    <h3 class="tech-heading">System Operations</h3>
+                    <div class="action-cards">
+                        <div class="action-card angular-card">
+                            <div class="action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <h4>Create Credential</h4>
+                            <p>Issue a new digital credential</p>
+                            <a href="#" class="tech-btn">Execute</a>
+                        </div>
+                        <div class="action-card angular-card">
+                            <div class="action-icon">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                            <h4>Share Credential</h4>
+                            <p>Share your credentials securely</p>
+                            <a href="#" class="tech-btn">Execute</a>
+                        </div>
+                        <div class="action-card angular-card">
+                            <div class="action-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h4>Verify Credential</h4>
+                            <p>Authenticate received credentials</p>
+                            <a href="#" class="tech-btn">Execute</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Activity with Techno Design -->
+                <section class="recent-activity tech-card">
+                    <h3 class="tech-heading">System Activity Log</h3>
+                    <div class="activity-list">
+                        <div class="tech-empty-state">
+                            <i class="fas fa-terminal"></i>
+                            <p class="mono-text">NO_RECENT_ACTIVITY</p>
+                            <p>Your system activity will be logged here.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        // Display current time in the tech format
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        // Update time every second
+        setInterval(updateTime, 1000);
+        updateTime(); // Initial call
+        
+        // Sidebar toggle functionality
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.dashboard-container').classList.toggle('sidebar-collapse');
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustChain | Verification System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/verification.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="logo">
+            <a href="index.html">
+                <i class="fas fa-link chain-icon"></i>
+                <span>TrustChain</span>
+            </a>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="verification.html" class="active">Verification</a>
+            <a href="about.html">About</a>
+        </nav>
+        <div class="user-actions">
+            <span id="userDisplay">Guest</span>
+            <button id="loginBtn" onclick="window.location.href='login.html'">Login</button>
+            <button id="logoutBtn" style="display: none;">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="verification-main">
+        <!-- Role Selection -->
+        <section class="role-switcher">
+            <h2>Select Your Role</h2>
+            <div class="role-buttons">
+                <button id="universityRole" class="role-btn">
+                    <i class="fas fa-university"></i>
+                    <span>University</span>
+                </button>
+                <button id="studentRole" class="role-btn">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Student</span>
+                </button>
+                <button id="employerRole" class="role-btn">
+                    <i class="fas fa-building"></i>
+                    <span>Employer</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- University Section (Issuer) -->
+        <section id="universitySection" class="role-section">
+            <div class="section-header">
+                <h2>University Issuer Dashboard</h2>
+                <p>Issue and manage academic credentials securely on the blockchain</p>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Issued</h3>
+                        <span id="totalIssuedCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Active Certificates</h3>
+                        <span id="activeCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Recent Activity</h3>
+                        <span id="recentActivityCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-panels">
+                <div class="panel issue-panel">
+                    <h3>Issue New Certificate</h3>
+                    <form id="issueCertificateForm">
+                        <div class="form-group">
+                            <label for="universityName">Institution Name</label>
+                            <input type="text" id="universityName" placeholder="Enter your university name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEmail">Student Email</label>
+                            <input type="email" id="studentEmail" placeholder="student@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="certificateName">Certificate Name</label>
+                            <input type="text" id="certificateName" placeholder="Bachelor of Technology" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="certificateType">Certificate Type</label>
+                            <select id="certificateType" required>
+                                <option value="">Select certificate type</option>
+                                <option value="degree">Degree</option>
+                                <option value="diploma">Diploma</option>
+                                <option value="certificate">Course Certificate</option>
+                                <option value="transcript">Transcript</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn primary">Issue Certificate</button>
+                    </form>
+                </div>
+                
+                <div class="panel manage-panel">
+                    <h3>Certificate Management</h3>
+                    <div class="management-actions">
+                        <button class="btn secondary">
+                            <i class="fas fa-search"></i> Search Certificates
+                        </button>
+                        <button class="btn secondary">
+                            <i class="fas fa-ban"></i> Revoke Certificate
+                        </button>
+                        <button class="btn secondary">
+                            <i class="fas fa-history"></i> View Issue History
+                        </button>
+                    </div>
+                    <div class="feature-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Advanced management features available in the premium version</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Student Section -->
+        <section id="studentSection" class="role-section">
+            <div class="section-header">
+                <h2>Student Credential Management</h2>
+                <p>Access and share your academic credentials securely</p>
+            </div>
+
+            <!-- Biometric Authentication -->
+            <div class="biometric-auth">
+                <h3>Biometric Authentication Required</h3>
+                <p>To access your credentials, please complete biometric verification</p>
+                
+                <div class="fingerprint">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                
+                <div class="scan-status">
+                    <div class="status-text">Ready to scan</div>
+                    <div class="scan-progress">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+                
+                <button id="biometricAuthBtn" class="btn primary">Start Biometric Scan</button>
+            </div>
+
+            <!-- Credentials Container (shown after authentication) -->
+            <div id="credential-container" style="display: none;">
+                <h3>Your Verified Credentials</h3>
+                
+                <!-- Empty state -->
+                <div class="empty-state">
+                    <i class="fas fa-certificate"></i>
+                    <p>You don't have any credentials yet</p>
+                </div>
+                
+                <!-- Credentials list -->
+                <div class="credentials-list">
+                    <!-- Credential cards will be added here dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Employer Section (Verifier) -->
+        <section id="employerSection" class="role-section">
+            <div class="section-header">
+                <h2>Credential Verification System</h2>
+                <p>Verify academic credentials and detect fraud with blockchain technology</p>
+            </div>
+
+            <!-- Verification Methods -->
+            <div class="verification-methods">
+                <div class="methods-tabs">
+                    <div class="method-tab active" data-method="file">
+                        <i class="fas fa-file-upload"></i>
+                        <span>File Upload</span>
+                    </div>
+                    <div class="method-tab" data-method="qr">
+                        <i class="fas fa-qrcode"></i>
+                        <span>QR Scan</span>
+                    </div>
+                    <div class="method-tab" data-method="hash">
+                        <i class="fas fa-hashtag"></i>
+                        <span>Certificate Hash</span>
+                    </div>
+                </div>
+
+                <!-- File Upload Panel -->
+                <div id="filePanel" class="method-panel active">
+                    <h3>Upload Certificate File</h3>
+                    <div class="upload-zone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop a certificate file or click to browse</p>
+                        <input type="file" id="certificateFile" style="display: none;">
+                    </div>
+                    <div class="file-details" style="display: none;">
+                        <div class="file-info">
+                            <i class="fas fa-file-pdf"></i>
+                            <span id="selected-filename">filename.pdf</span>
+                        </div>
+                        <button id="verifyFileBtn" class="btn primary">Verify Certificate</button>
+                    </div>
+                </div>
+
+                <!-- QR Scan Panel -->
+                <div id="qrPanel" class="method-panel">
+                    <h3>Scan QR Code</h3>
+                    <div class="qr-scanner">
+                        <div class="scanner-placeholder">
+                            <i class="fas fa-camera"></i>
+                            <p>Camera access required for QR scanning</p>
+                        </div>
+                        <button id="startScanBtn" class="btn primary">Start QR Scanner</button>
+                    </div>
+                </div>
+
+                <!-- Hash Verification Panel -->
+                <div id="hashPanel" class="method-panel">
+                    <h3>Verify by Certificate Hash</h3>
+                    <p>Enter the unique hash identifier of the certificate</p>
+                    <div class="hash-input">
+                        <input type="text" id="hashInput" placeholder="Enter certificate hash (e.g., a1b2c3d4...)">
+                        <button id="verifyHashBtn" class="btn primary">Verify</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Process (Initially Hidden) -->
+            <div class="verification-process" style="display: none;">
+                <h3>Verification in Progress</h3>
+                <div class="process-steps">
+                    <div id="blockchainVerification" class="verification-step status-pending">
+                        <div class="step-status">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="step-details">
+                            <h4>Blockchain Verification</h4>
+                            <p>Verifying certificate existence on blockchain</p>
+                        </div>
+                    </div>
+                    <div id="integrityCheck" class="verification-step status-pending">
+                        <div class="step-status">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="step-details">
+                            <h4>Integrity Check</h4>
+                            <p>Validating certificate data integrity</p>
+                        </div>
+                    </div>
+                    <div id="issuerVerification" class="verification-step status-pending">
+                        <div class="step-status">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="step-details">
+                            <h4>Issuer Verification</h4>
+                            <p>Confirming issuer authenticity</p>
+                        </div>
+                    </div>
+                    <div id="fraudDetection" class="verification-step status-pending">
+                        <div class="step-status">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="step-details">
+                            <h4>Fraud Detection</h4>
+                            <p>Checking for tampering and fraud indicators</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Credential Details Modal -->
+    <div id="credentialModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Credential Details</h3>
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="credential-info">
+                    <div class="info-group">
+                        <label>Certificate Name:</label>
+                        <span id="credentialName"></span>
+                    </div>
+                    <div class="info-group">
+                        <label>Issuing Institution:</label>
+                        <span id="credentialIssuer"></span>
+                    </div>
+                    <div class="info-group">
+                        <label>Student Name:</label>
+                        <span id="credentialStudent"></span>
+                    </div>
+                    <div class="info-group">
+                        <label>Certificate Type:</label>
+                        <span id="credentialType"></span>
+                    </div>
+                    <div class="info-group">
+                        <label>Issue Date:</label>
+                        <span id="credentialDate"></span>
+                    </div>
+                    <div id="blockchainDetails" class="info-group">
+                        <label>Blockchain Hash:</label>
+                        <span id="credentialHash" class="hash-value"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary modal-close-btn">Close</button>
+                <button class="btn primary">Download Certificate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Result Modal -->
+    <div id="verificationResultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body result-body">
+                <div class="result-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="result-title">
+                    <h3>Certificate Verified</h3>
+                    <p>This certificate is valid and has not been tampered with.</p>
+                </div>
+                <div id="verifiedDetails" class="verified-details">
+                    <h4>Certificate Information</h4>
+                    <div class="verified-info">
+                        <div class="info-row">
+                            <label>Certificate:</label>
+                            <span id="verifiedName"></span>
+                        </div>
+                        <div class="info-row">
+                            <label>Issuer:</label>
+                            <span id="verifiedIssuer"></span>
+                        </div>
+                        <div class="info-row">
+                            <label>Student:</label>
+                            <span id="verifiedStudent"></span>
+                        </div>
+                        <div class="info-row">
+                            <label>Issue Date:</label>
+                            <span id="verifiedDate"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary modal-close-btn">Close</button>
+                <button class="btn primary">Download Certificate Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/verification.js"></script>
+</body>
+</html> 

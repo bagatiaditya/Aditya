@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustChain | Simple Verification</title>
+    <style>
+        /* Basic Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        header {
+            background-color: #4285f4;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .logo a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        .chain-icon {
+            margin-right: 0.5rem;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+        .nav-links a.active {
+            font-weight: bold;
+            border-bottom: 2px solid white;
+        }
+        .user-actions {
+            display: flex;
+            align-items: center;
+        }
+        .user-actions span {
+            margin-right: 1rem;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #34a853;
+            color: white;
+            font-weight: 500;
+        }
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        /* Role Selection */
+        .role-switcher {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .role-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        .role-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            width: 180px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .role-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #4285f4;
+        }
+        .role-btn.active {
+            border-color: #4285f4;
+            background-color: rgba(66, 133, 244, 0.05);
+        }
+        .role-btn i {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: #4285f4;
+        }
+        .role-btn span {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        /* Role Sections */
+        .role-section {
+            display: none;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .section-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .section-header p {
+            color: #757575;
+            font-size: 1.1rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        /* Certificate Styles */
+        .certificate-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .certificate-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .certificate-card h4 {
+            margin-top: 0;
+            color: #4285f4;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 0.75rem;
+        }
+        .certificate-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .certificate-actions button {
+            margin-top: 0.5rem;
+            background-color: #4285f4;
+        }
+        .certificate-actions button.tamper-cert {
+            background-color: #ea4335;
+        }
+        .certificate-actions button.share-cert {
+            background-color: #34a853;
+        }
+        .certificate-actions button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+        
+        /* Verification Styles */
+        .verification-card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .verify-btn {
+            background-color: #4285f4;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        .verification-result {
+            background-color: #f0f4fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .verification-success {
+            color: #34a853;
+        }
+        .verification-failed {
+            color: #ea4335;
+        }
+        .verification-details {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .verification-details code {
+            background-color: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .tamper-warning {
+            color: #ea4335;
+            font-weight: bold;
+        }
+        .verify-success {
+            color: #34a853;
+            font-weight: bold;
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table th, table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        table th {
+            font-weight: 600;
+            background-color: #f5f5f5;
+        }
+        table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        /* Google Drive link styles */
+        .drive-link {
+            display: inline-flex;
+            align-items: center;
+            color: #4285f4;
+            text-decoration: none;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        .drive-link:hover {
+            background-color: rgba(66, 133, 244, 0.1);
+            text-decoration: underline;
+        }
+        .drive-link i {
+            margin-right: 0.4rem;
+            color: #ea4335;
+        }
+        
+        /* Loading animation */
+        .loading-message {
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .loading-message .fa-spinner {
+            color: #4285f4;
+            margin-right: 0.5rem;
+        }
+        
+        /* PDF template preview */
+        .template-preview {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        .template-option {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin: 0 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .template-option:hover, .template-option.selected {
+            border-color: #4285f4;
+            background-color: rgba(66, 133, 244, 0.05);
+        }
+        .template-option img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .template-option h4 {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        /* PDF Preview Styles */
+        .certificate-preview-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .certificate-preview-container h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .pdf-preview {
+            background-color: white;
+            width: 100%;
+            max-width: 750px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            border-bottom: 4px double #999;
+            padding-bottom: 1.5rem;
+        }
+        .pdf-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4285f4;
+        }
+        .pdf-title {
+            text-align: center;
+            font-size: 2rem;
+            margin: 0;
+            color: #333;
+        }
+        .pdf-content {
+            text-align: center;
+            margin: 3rem 0;
+        }
+        .pdf-statement {
+            margin: 0.5rem 0;
+            font-size: 1.2rem;
+        }
+        .pdf-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            color: #4285f4;
+        }
+        .pdf-course {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            color: #333;
+        }
+        .pdf-grade {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+        .grade-value {
+            font-weight: bold;
+        }
+        .pdf-date {
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        .pdf-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 4rem;
+            border-top: 1px solid #ddd;
+            padding-top: 2rem;
+        }
+        .pdf-signature {
+            text-align: center;
+            border-top: 1px solid #999;
+            padding-top: 0.5rem;
+            width: 200px;
+        }
+        .pdf-verification {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .preview-actions {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .preview-actions button {
+            background-color: white;
+            color: #4285f4;
+            border: 1px solid #4285f4;
+            padding: 0.75rem 1.5rem;
+        }
+        .preview-actions button:hover {
+            background-color: #4285f4;
+            color: white;
+        }
+        
+        /* Tamper dialog styles */
+        .tamper-options {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            width: 400px;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        .tamper-options h3 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .tamper-field-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .tamper-field {
+            padding: 1rem;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tamper-field:hover {
+            background-color: #e0e0e0;
+            border-color: #999;
+        }
+        .cancel-tamper {
+            width: 100%;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+        .tampered {
+            background-color: #ea4335;
+        }
+        
+        /* File upload styles */
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-help {
+            display: block;
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* PDF iframe preview */
+        .pdf-actual-preview {
+            width: 100%;
+            height: 600px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pdf-actual-preview iframe {
+            display: block;
+            background-color: white;
+        }
+        
+        /* University tab styles */
+        .university-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .tab-button.active {
+            background-color: white;
+            border-bottom: 2px solid #4285f4;
+            color: #4285f4;
+        }
+        
+        .tab-content {
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            padding: 1.5rem;
+        }
+        
+        /* Transcript styles */
+        .transcript-preview {
+            background-color: white;
+            padding: 2rem;
+            font-family: Arial, sans-serif;
+        }
+        
+        .transcript-header {
+            text-align: center;
+            border-bottom: 2px solid #fa8072;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            background-color: #ffe4e1;
+            padding: 1rem;
+        }
+        
+        .transcript-title {
+            color: #333;
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .transcript-logo {
+            font-weight: bold;
+            color: #444;
+        }
+        
+        .transcript-subtitle {
+            text-align: center;
+            background-color: #e0ffe0;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .transcript-student-info {
+            margin: 1.5rem 0;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .info-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-table td:first-child {
+            font-weight: bold;
+            width: 200px;
+        }
+        
+        .transcript-results {
+            margin: 2rem 0;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .results-table th {
+            background-color: #f0f0f0;
+            padding: 0.5rem;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        
+        .results-table td {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+        }
+        
+        .transcript-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        /* Subject table inputs */
+        .subjects-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+        }
+        
+        .subjects-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .subjects-table th {
+            padding: 0.5rem;
+            background-color: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+            text-align: left;
+        }
+        
+        .subjects-table input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .table-actions {
+            margin-top: 1rem;
+            text-align: right;
+        }
+        
+        .secondary-btn {
+            background-color: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="logo">
+            <a href="#">
+                <i class="fas fa-link chain-icon"></i>
+                <span>TrustChain</span>
+            </a>
+        </div>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Dashboard</a>
+            <a href="#" class="active">Verification</a>
+            <a href="#">About</a>
+        </nav>
+        <div class="user-actions">
+            <span id="userDisplay">Virat (Student)</span>
+            <button id="loginBtn">Login</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="verification-main">
+        <!-- Role Selection -->
+        <section class="role-switcher">
+            <h2>Select Your Role</h2>
+            <div class="role-buttons">
+                <button id="universityRole" class="role-btn">
+                    <i class="fas fa-university"></i>
+                    <span>University</span>
+                </button>
+                <button id="studentRole" class="role-btn">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Student</span>
+                </button>
+                <button id="employerRole" class="role-btn">
+                    <i class="fas fa-building"></i>
+                    <span>Employer</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- University Section (Issuer) -->
+        <section id="universitySection" class="role-section">
+            <div class="section-header">
+                <h2>University Issuer Dashboard</h2>
+                <p>Issue and manage academic credentials securely on the blockchain</p>
+            </div>
+            <!-- Dynamic content will be added here by JavaScript -->
+        </section>
+
+        <!-- Student Section -->
+        <section id="studentSection" class="role-section">
+            <div class="section-header">
+                <h2>Student Credential Management</h2>
+                <p>Access and share your academic credentials securely</p>
+            </div>
+            <!-- Dynamic content will be added here by JavaScript -->
+        </section>
+
+        <!-- Employer Section (Verifier) -->
+        <section id="employerSection" class="role-section">
+            <div class="section-header">
+                <h2>Credential Verification System</h2>
+                <p>Verify academic credentials and detect fraud with blockchain technology</p>
+            </div>
+            <!-- Dynamic content will be added here by JavaScript -->
+        </section>
+    </main>
+
+    <!-- Our Verification Demo Script -->
+    <script src="js/verification-demo.js"></script>
+</body>
+</html> 

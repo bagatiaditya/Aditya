@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Firebase Test</title>
+</head>
+<body>
+  <h2>Firebase Authentication Test</h2>
+  <div>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <button id="googleBtn">Login with Google</button>
+  </div>
+  <div id="status"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG7lvUR5kkemzeByfAh84L_MyNAgSgE8s",
+      authDomain: "trustchain-59c7d.firebaseapp.com",
+      projectId: "trustchain-59c7d",
+      storageBucket: "trustchain-59c7d.appspot.com",
+      messagingSenderId: "280571291668",
+      appId: "1:280571291668:web:3f1a16432250f4847a9f01"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.auth().useDeviceLanguage();
+    
+    document.getElementById('loginBtn').addEventListener('click', function() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const status = document.getElementById('status');
+      
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          status.textContent = "Success! User logged in.";
+        })
+        .catch((error) => {
+          status.textContent = "Error: " + error.message;
+          console.error(error);
+        });
+    });
+
+    document.getElementById('googleBtn').addEventListener('click', function() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          document.getElementById('status').textContent = "Google sign-in successful!";
+        }).catch((error) => {
+          document.getElementById('status').textContent = "Google sign-in error: " + error.message;
+          console.error(error);
+        });
+    });
+  </script>
+</body>
+</html> 

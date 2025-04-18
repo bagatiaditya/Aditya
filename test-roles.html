@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Selection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .role-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .role-button {
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .role-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .role-section {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        .role-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Role Selection Test</h1>
+    
+    <div class="role-buttons">
+        <button class="role-button" data-role="university">University</button>
+        <button class="role-button" data-role="student">Student</button>
+        <button class="role-button" data-role="employer">Employer</button>
+    </div>
+    
+    <div id="university-section" class="role-section">
+        <h2>University Section</h2>
+        <p>This is the university section content.</p>
+    </div>
+    
+    <div id="student-section" class="role-section">
+        <h2>Student Section</h2>
+        <p>This is the student section content.</p>
+    </div>
+    
+    <div id="employer-section" class="role-section">
+        <h2>Employer Section</h2>
+        <p>This is the employer section content.</p>
+    </div>
+
+    <script>
+        // Simple role selection without dependencies
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all role buttons
+            const roleButtons = document.querySelectorAll('.role-button');
+            
+            // Add click event to each button
+            roleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const role = this.getAttribute('data-role');
+                    selectRole(role);
+                });
+            });
+            
+            // Default to university role on page load
+            selectRole('university');
+            
+            // Function to select a role
+            function selectRole(role) {
+                console.log('Selecting role:', role);
+                
+                // Remove active class from all buttons and sections
+                document.querySelectorAll('.role-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.role-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Add active class to selected button and section
+                document.querySelector(`.role-button[data-role="${role}"]`).classList.add('active');
+                document.getElementById(`${role}-section`).classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html> 

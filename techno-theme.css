@@ -1,0 +1,298 @@
+/* Techno-Minimalist Theme - TrustChain Dashboard */
+
+:root {
+  /* Updated color scheme for techno-minimalist design */
+  --tech-dark: #0f1923;
+  --tech-medium: #1a2634;
+  --tech-light: #2a3a4a;
+  --tech-accent: #00c8ff;
+  --tech-accent-alt: #00ffaa;
+  --tech-text: #e0e0e0;
+  --tech-text-secondary: #a0a0a0;
+  
+  /* Monospace font for technical data */
+  --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+  --font-sans: 'Roboto', 'Segoe UI', sans-serif;
+  
+  /* Animations and transitions */
+  --tech-transition: all 0.25s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+/* Body and general styles */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--tech-dark);
+  color: var(--tech-text);
+}
+
+/* Monospace text for data elements */
+.mono-text {
+  font-family: var(--font-mono);
+  letter-spacing: -0.03em;
+}
+
+/* Hexagonal pattern background */
+.hexagon-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.05;
+  pointer-events: none;
+  background: 
+    linear-gradient(60deg, var(--tech-accent) 25%, transparent 25%) 0 0,
+    linear-gradient(60deg, transparent 75%, var(--tech-accent) 75%) 0 0,
+    linear-gradient(60deg, transparent 75%, var(--tech-accent) 75%) 0 0,
+    linear-gradient(120deg, var(--tech-accent) 25%, transparent 25%) 0 0;
+  background-size: 40px 70px;
+}
+
+/* Angular precision-cut UI elements */
+.angular-card {
+  background-color: var(--tech-medium);
+  clip-path: polygon(
+    0 10px, 
+    10px 0, 
+    100% 0, 
+    100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 
+    0 100%
+  );
+  transition: var(--tech-transition);
+  border-left: 3px solid transparent;
+}
+
+.angular-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 200, 255, 0.2);
+  border-left-color: var(--tech-accent);
+}
+
+/* Techno-style buttons */
+.tech-btn {
+  background-color: var(--tech-medium);
+  color: var(--tech-text);
+  clip-path: polygon(
+    0 10px, 
+    10px 0, 
+    100% 0, 
+    100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 
+    0 100%
+  );
+  transition: var(--tech-transition);
+  border: none;
+  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-btn::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--tech-accent);
+  transition: var(--tech-transition);
+}
+
+.tech-btn:hover {
+  background-color: var(--tech-light);
+  color: var(--tech-accent);
+}
+
+.tech-btn:hover::before {
+  width: 100%;
+}
+
+/* Techno sidebar */
+.tech-sidebar {
+  background-color: var(--tech-medium);
+  border-right: 1px solid rgba(0, 200, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent 0%, rgba(0, 200, 255, 0.03) 100%);
+  pointer-events: none;
+}
+
+/* Techno style navigation items */
+.tech-nav-item {
+  position: relative;
+  margin-bottom: 5px;
+  transition: var(--tech-transition);
+}
+
+.tech-nav-item a {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  color: var(--tech-text-secondary);
+  text-decoration: none;
+  transition: var(--tech-transition);
+  border-left: 3px solid transparent;
+}
+
+.tech-nav-item a:hover {
+  background-color: rgba(0, 200, 255, 0.05);
+  color: var(--tech-text);
+  border-left-color: var(--tech-accent);
+}
+
+.tech-nav-item.active a {
+  color: var(--tech-accent);
+  background-color: rgba(0, 200, 255, 0.05);
+  border-left-color: var(--tech-accent);
+}
+
+.tech-nav-item i {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+/* Data indicators */
+.data-indicator {
+  font-family: var(--font-mono);
+  background-color: var(--tech-light);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  color: var(--tech-accent);
+  position: relative;
+  overflow: hidden;
+}
+
+.data-indicator::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--tech-accent), transparent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+/* Main dashboard content */
+.tech-main-content {
+  background-color: var(--tech-dark);
+}
+
+/* Dashboard cards */
+.tech-card {
+  background-color: var(--tech-medium);
+  border-radius: 0;
+  clip-path: polygon(
+    0 10px, 
+    10px 0, 
+    100% 0, 
+    100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 
+    0 100%
+  );
+  overflow: hidden;
+  border-left: 3px solid transparent;
+  transition: var(--tech-transition);
+}
+
+.tech-card:hover {
+  border-left-color: var(--tech-accent);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 200, 255, 0.2);
+}
+
+/* Tech headings */
+.tech-heading {
+  font-family: var(--font-sans);
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.tech-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--tech-accent), transparent);
+}
+
+/* Technological accents */
+.tech-accent-border {
+  position: relative;
+}
+
+.tech-accent-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--tech-accent), transparent);
+}
+
+/* Status indicators */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-active {
+  background-color: var(--tech-accent);
+  box-shadow: 0 0 8px var(--tech-accent);
+}
+
+.status-inactive {
+  background-color: var(--tech-text-secondary);
+}
+
+/* Empty state with tech styling */
+.tech-empty-state {
+  border: 1px dashed rgba(0, 200, 255, 0.2);
+  border-radius: 0;
+  padding: 20px;
+  text-align: center;
+  color: var(--tech-text-secondary);
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .angular-card {
+    clip-path: none;
+  }
+  
+  .tech-btn {
+    clip-path: none;
+  }
+  
+  .tech-card {
+    clip-path: none;
+  }
+} 

@@ -1,0 +1,1040 @@
+// Firebase Authentication & Firestore References
+let auth;
+let db;
+let storage;
+
+// User role tracking
+let currentUserRole = 'employer'; // Default role
+
+// DOM Elements
+const roleBtns = document.querySelectorAll('.role-btn');
+const universityBtn = document.getElementById('university-btn');
+const studentBtn = document.getElementById('student-btn');
+const employerBtn = document.getElementById('employer-btn');
+
+// Sections
+const credentialVerification = document.getElementById('credential-verification');
+const universityDashboard = document.getElementById('university-dashboard');
+const studentDashboard = document.getElementById('student-dashboard');
+
+// Verification method tabs
+const fileUploadTab = document.getElementById('file-upload-tab');
+const qrCodeTab = document.getElementById('qr-code-tab');
+const hashTab = document.getElementById('hash-tab');
+
+// Verification methods
+const fileUploadMethod = document.getElementById('file-upload-method');
+const qrCodeMethod = document.getElementById('qr-code-method');
+const hashMethod = document.getElementById('hash-method');
+
+// File upload
+const fileDropArea = document.getElementById('file-drop-area');
+const certificateFile = document.getElementById('certificate-file');
+
+// QR Scanner
+const qrScanner = document.getElementById('qr-scanner');
+const qrVideo = document.getElementById('qr-video');
+const startScanBtn = document.getElementById('start-scan-btn');
+
+// Hash verification
+const certificateHash = document.getElementById('certificate-hash');
+const verifyHashBtn = document.getElementById('verify-hash-btn');
+
+// Verification process
+const verificationProcess = document.getElementById('verification-process');
+const verificationResult = document.getElementById('verification-result');
+
+// University dashboard
+const issueCertificateForm = document.getElementById('issue-certificate-form');
+
+// Student dashboard
+const biometricAuthContainer = document.getElementById('biometric-auth-container');
+const authenticateBtn = document.getElementById('authenticate-btn');
+const credentialsContainer = document.getElementById('credentials-container');
+const credentialsList = document.getElementById('credentials-list');
+
+// Modals
+const credentialModal = document.getElementById('credential-modal');
+const verificationModal = document.getElementById('verification-modal');
+const shareModal = document.getElementById('share-modal');
+
+// Login/logout
+const userLoggedIn = document.getElementById('user-logged-in');
+const userLoggedOut = document.getElementById('user-logged-out');
+const userName = document.getElementById('user-name');
+const logoutBtn = document.getElementById('logout-btn');
+
+// Initialize Firebase
+document.addEventListener('DOMContentLoaded', () => {
+    initializeFirebase();
+    setupEventListeners();
+    
+    // Default to employer role
+    switchRole(employerBtn);
+    
+    checkAuthState();
+});
+
+// Initialize Firebase with config
+function initializeFirebase() {
+    try {
+        // Use the global Firebase auth that was initialized in firebase-config.js
+        auth = firebase.auth();
+        db = firebase.firestore();
+        storage = firebase.storage();
+        
+        console.log('Firebase initialized successfully');
+    } catch (error) {
+        console.error('Error initializing Firebase:', error);
+        showNotification('Error initializing application. Please try again later.', 'error');
+    }
+}
+
+// Check authentication state
+function checkAuthState() {
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is signed in
+            console.log('User is signed in:', user.email);
+            // Update user display
+            userLoggedIn.style.display = 'flex';
+            userLoggedOut.style.display = 'none';
+            userName.textContent = user.email;
+            
+            // Check user's role in Firestore
+            checkUserRole(user.uid);
+        } else {
+            // User is signed out
+            console.log('User is signed out');
+            userLoggedIn.style.display = 'none';
+            userLoggedOut.style.display = 'flex';
+            
+            // Check for stored role in localStorage (for returning users)
+            const storedRole = localStorage.getItem('userRole');
+            if (storedRole) {
+                currentUserRole = storedRole;
+            } else {
+                // Set default role for guests
+                currentUserRole = 'employer';
+            }
+            
+            // Configure UI based on role
+            configureRoleAccess(currentUserRole);
+        }
+    });
+}
+
+// Check user role in Firestore
+async function checkUserRole(userId) {
+    try {
+        // First check if we have the role cached in localStorage
+        const cachedRole = localStorage.getItem('userRole');
+        let userRole = cachedRole;
+        
+        // Get fresh data from Firestore
+        const userDoc = await db.collection('users').doc(userId).get();
+        
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            userRole = userData.role || 'student';
+            
+            // Update cache with the latest role information
+            localStorage.setItem('userRole', userRole);
+            
+            // Check if the user's university account is pending approval
+            if (userRole === 'university' && userData.status === 'pending') {
+                // Redirect to pending page
+                window.location.href = 'pending-approval.html';
+                return;
+            }
+            
+            // Set the current role
+            currentUserRole = userRole;
+            
+            // Configure UI based on user role
+            configureRoleAccess(currentUserRole);
+            
+            // Select the appropriate role button based on permissions
+            if (currentUserRole === 'university') {
+                universityBtn.click();
+            } else if (currentUserRole === 'student') {
+                studentBtn.click();
+                checkAndLoadStudentCredentials();
+            } else {
+                employerBtn.click();
+            }
+            
+            // Load role-specific data
+            if (currentUserRole === 'university') {
+                loadUniversityStats();
+                // Check if university has been approved
+                if (userData.status !== 'active') {
+                    showNotification('Your university account is pending approval', 'warning');
+                }
+            }
+        } else {
+            console.log('No user data found - creating default user document');
+            
+            // Create a default user document
+            await db.collection('users').doc(userId).set({
+                email: auth.currentUser.email,
+                role: 'student',
+                createdAt: new Date().toISOString(),
+                status: 'active'
+            });
+            
+            // Default to student role
+            currentUserRole = 'student';
+            localStorage.setItem('userRole', currentUserRole);
+            
+            configureRoleAccess(currentUserRole);
+            studentBtn.click();
+        }
+    } catch (error) {
+        console.error('Error checking user role:', error);
+        showNotification('Error retrieving user data', 'error');
+    }
+}
+
+// Configure UI based on user role
+function configureRoleAccess(role) {
+    console.log('Configuring access for role:', role);
+    
+    // Reset all buttons
+    roleBtns.forEach(btn => {
+        btn.classList.remove('disabled');
+        btn.removeAttribute('title');
+    });
+    
+    // Apply restrictions based on role
+    if (role === 'student' || role === 'employer') {
+        universityBtn.classList.add('disabled');
+        universityBtn.setAttribute('title', 'Access restricted to university staff');
+    }
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Role buttons
+    roleBtns.forEach(btn => {
+        btn.addEventListener('click', () => switchRole(btn));
+    });
+    
+    // Method tabs
+    fileUploadTab.addEventListener('click', () => switchMethod(fileUploadTab, 'file'));
+    qrCodeTab.addEventListener('click', () => switchMethod(qrCodeTab, 'qr'));
+    hashTab.addEventListener('click', () => switchMethod(hashTab, 'hash'));
+    
+    // File upload
+    fileDropArea.addEventListener('click', () => {
+        certificateFile.click();
+    });
+    
+    certificateFile.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileUpload(e.target.files[0]);
+        }
+    });
+    
+    // Drag and drop handling
+    fileDropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileDropArea.classList.add('dragover');
+    });
+    
+    fileDropArea.addEventListener('dragleave', () => {
+        fileDropArea.classList.remove('dragover');
+    });
+    
+    fileDropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileDropArea.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length > 0) {
+            handleFileUpload(e.dataTransfer.files[0]);
+        }
+    });
+    
+    // QR Scanner
+    startScanBtn.addEventListener('click', startQrScanner);
+    
+    // Hash verification
+    verifyHashBtn.addEventListener('click', verifyHash);
+    
+    // University certificate issuing
+    if (issueCertificateForm) {
+        issueCertificateForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            issueCertificate();
+        });
+    }
+    
+    // Student biometric authentication
+    if (authenticateBtn) {
+        authenticateBtn.addEventListener('click', startBiometricAuth);
+    }
+    
+    // Close modals
+    document.querySelectorAll('.modal-close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', () => {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        });
+    });
+    
+    // Logout button
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+                showNotification('You have been signed out', 'info');
+            }).catch(error => {
+                console.error('Error signing out:', error);
+                showNotification('Error signing out', 'error');
+            });
+        });
+    }
+    
+    // Check for URL parameters for verification
+    checkUrlForVerification();
+}
+
+// Check if URL contains verification parameters
+function checkUrlForVerification() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const credentialId = urlParams.get('verify');
+    
+    if (credentialId) {
+        console.log('Verification requested for credential:', credentialId);
+        // Switch to employer role and verify the credential
+        switchRole(employerBtn);
+        startVerificationProcess({ id: credentialId, source: 'url' });
+    }
+}
+
+// Switch between roles
+function switchRole(clickedBtn) {
+    // Don't allow switching to disabled roles
+    if (clickedBtn.classList.contains('disabled')) {
+        showNotification('You do not have permission to access this role', 'warning');
+        return;
+    }
+    
+    // Update button states
+    roleBtns.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    clickedBtn.classList.add('active');
+    
+    // Get the role from the button's data attribute
+    const role = clickedBtn.getAttribute('data-role');
+    currentUserRole = role;
+    
+    // Hide all sections
+    universityDashboard.style.display = 'none';
+    studentDashboard.style.display = 'none';
+    credentialVerification.style.display = 'none';
+    
+    // Show the selected section
+    if (role === 'university') {
+        universityDashboard.style.display = 'block';
+    } else if (role === 'student') {
+        studentDashboard.style.display = 'block';
+        checkAndLoadStudentCredentials();
+    } else { // employer
+        credentialVerification.style.display = 'block';
+    }
+    
+    // Save the selected role to localStorage
+    localStorage.setItem('userRole', role);
+}
+
+// Switch between verification methods
+function switchMethod(clickedTab, method) {
+    // Update tab states
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    clickedTab.classList.add('active');
+    
+    // Hide all method panels
+    fileUploadMethod.style.display = 'none';
+    qrCodeMethod.style.display = 'none';
+    hashMethod.style.display = 'none';
+    
+    // Show the selected method
+    if (method === 'file') {
+        fileUploadMethod.style.display = 'block';
+    } else if (method === 'qr') {
+        qrCodeMethod.style.display = 'block';
+    } else if (method === 'hash') {
+        hashMethod.style.display = 'block';
+    }
+    
+    // Reset verification UI
+    verificationProcess.style.display = 'none';
+    verificationResult.style.display = 'none';
+}
+
+// Handle file upload for verification
+function handleFileUpload(file) {
+    if (!file) return;
+    
+    showNotification(`Processing file: ${file.name}`, 'info');
+    
+    // Start verification process with the file
+    startVerificationProcess(file);
+}
+
+// Start QR code scanner
+function startQrScanner() {
+    // Show loading
+    document.getElementById('loading-indicator').style.display = 'block';
+    
+    // Access the camera
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                qrVideo.srcObject = stream;
+                qrVideo.setAttribute('playsinline', true);
+                qrVideo.play();
+                
+                // Start scanning
+                requestAnimationFrame(scanQRCode);
+                
+                // Show notification
+                showNotification('QR scanner activated', 'info');
+            })
+            .catch(function(error) {
+                console.error('Error accessing camera:', error);
+                showNotification('Could not access camera. Please check permissions.', 'error');
+                document.getElementById('loading-indicator').style.display = 'none';
+            });
+    } else {
+        showNotification('Camera access not supported on this device or browser', 'error');
+        document.getElementById('loading-indicator').style.display = 'none';
+    }
+}
+
+// Scan QR code from video stream
+function scanQRCode() {
+    if (!qrVideo.videoWidth) {
+        requestAnimationFrame(scanQRCode);
+        return;
+    }
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = qrVideo.videoWidth;
+    canvas.height = qrVideo.videoHeight;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+    
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    try {
+        // Using jsQR library
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+            // Stop video stream
+            if (qrVideo.srcObject) {
+                qrVideo.srcObject.getTracks().forEach(track => track.stop());
+            }
+            
+            // Hide loading
+            document.getElementById('loading-indicator').style.display = 'none';
+            
+            // Process QR code data
+            startVerificationProcess({
+                type: 'qr',
+                data: code.data
+            });
+            
+            return;
+        }
+    } catch (error) {
+        console.error('Error scanning QR code:', error);
+    }
+    
+    // Continue scanning if no QR code found
+    requestAnimationFrame(scanQRCode);
+}
+
+// Verify hash
+function verifyHash() {
+    const hash = certificateHash.value.trim();
+    
+    if (!hash) {
+        showNotification('Please enter a valid certificate hash', 'error');
+        return;
+    }
+    
+    if (hash.length < 32) {
+        showNotification('Invalid hash format. Please check and try again.', 'error');
+        return;
+    }
+    
+    // Start verification with the provided hash
+    startVerificationProcess({
+        type: 'hash',
+        data: hash
+    });
+}
+
+// Start verification process
+function startVerificationProcess(data) {
+    console.log('Starting verification process', data);
+    
+    // Show verification process section
+    verificationProcess.style.display = 'block';
+    verificationResult.style.display = 'none';
+    
+    // Show loading indicator
+    document.getElementById('loading-indicator').style.display = 'block';
+    
+    // Start verification steps with some delay to show the process
+    setTimeout(() => updateVerificationStep('step-file-integrity', 'success'), 1000);
+    setTimeout(() => updateVerificationStep('step-blockchain-verification', 'pending'), 1100);
+    setTimeout(() => updateVerificationStep('step-blockchain-verification', 'success'), 3000);
+    setTimeout(() => updateVerificationStep('step-issuer-verification', 'pending'), 3100);
+    
+    // Simulate verification result (success/failure)
+    let isVerified = true;
+    let tamperedWith = false;
+    
+    // For file uploads, randomly simulate finding tampered files (20% chance)
+    if (data instanceof File) {
+        const randomCheck = Math.random();
+        if (randomCheck < 0.2) {
+            isVerified = false;
+            tamperedWith = true;
+            
+            // Show failure for issuer verification
+            setTimeout(() => updateVerificationStep('step-issuer-verification', 'error'), 4500);
+            setTimeout(() => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                showVerificationResult(false, tamperedWith);
+            }, 5000);
+            return;
+        }
+    }
+    
+    // Complete the verification process (success path)
+    setTimeout(() => updateVerificationStep('step-issuer-verification', 'success'), 4500);
+    setTimeout(() => {
+        document.getElementById('loading-indicator').style.display = 'none';
+        showVerificationResult(true, false);
+    }, 5000);
+}
+
+// Update verification step UI
+function updateVerificationStep(stepId, status) {
+    const step = document.getElementById(stepId);
+    if (!step) return;
+    
+    const statusElement = step.querySelector('.step-status');
+    if (!statusElement) return;
+    
+    // Remove all status classes
+    statusElement.classList.remove('pending', 'success', 'error');
+    
+    // Update icon and status class
+    const icon = statusElement.querySelector('i');
+    if (icon) {
+        if (status === 'pending') {
+            statusElement.classList.add('pending');
+            icon.className = 'fas fa-circle-notch fa-spin';
+        } else if (status === 'success') {
+            statusElement.classList.add('success');
+            icon.className = 'fas fa-check-circle';
+        } else if (status === 'error') {
+            statusElement.classList.add('error');
+            icon.className = 'fas fa-times-circle';
+        }
+    }
+}
+
+// Show verification result
+function showVerificationResult(isVerified, tamperedWith = false) {
+    // Hide verification process
+    verificationProcess.style.display = 'none';
+    
+    // Create verification result content
+    let resultHTML = '';
+    
+    if (isVerified) {
+        resultHTML = `
+            <div class="verification-success">
+                <div class="result-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Certificate Verified</h3>
+                <p>This certificate is valid and has been verified on the blockchain.</p>
+                
+                <div class="certificate-details glass-card">
+                    <div class="certificate-header">
+                        <div class="certificate-title">
+                            <h4>Bachelor of Computer Science</h4>
+                            <p>MIT University</p>
+                        </div>
+                    </div>
+                    <div class="certificate-info">
+                        <div class="info-item">
+                            <div class="info-label">Student Name:</div>
+                            <div class="info-value">John Smith</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Issue Date:</div>
+                            <div class="info-value">May 15, 2023</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Certificate ID:</div>
+                            <div class="info-value">MIT-CS-2023-42789</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Blockchain Hash:</div>
+                            <div class="info-value hash-value">0x7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c</div>
+                        </div>
+                    </div>
+                    <div class="certificate-actions">
+                        <button class="btn primary">
+                            <i class="fas fa-download"></i> Download Certificate
+                        </button>
+                        <button class="btn secondary">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Show error result
+        resultHTML = `
+            <div class="verification-error">
+                <div class="result-icon error">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h3>Verification Failed</h3>
+                <p>${tamperedWith ? 
+                    'This certificate appears to have been tampered with. The signature does not match the content.' : 
+                    'This certificate could not be verified on the blockchain.'}</p>
+                
+                ${tamperedWith ? `
+                <div class="security-warning glass-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="warning-details">
+                        <h4>Security Alert</h4>
+                        <p>The digital signature of this certificate does not match its content, indicating possible tampering.</p>
+                        <p>Please contact the issuing institution directly to verify this credential.</p>
+                    </div>
+                </div>` : ''}
+            </div>
+        `;
+    }
+    
+    // Update the verification result container
+    verificationResult.innerHTML = resultHTML;
+    verificationResult.style.display = 'block';
+}
+
+// Biometric authentication for student
+function startBiometricAuth() {
+    // Show loading indicator
+    document.getElementById('loading-indicator').style.display = 'block';
+    
+    // Add animation to fingerprint icon
+    const authIcon = document.querySelector('.auth-icon i');
+    if (authIcon) {
+        authIcon.classList.add('authenticating');
+    }
+    
+    // Simulate biometric authentication process
+    setTimeout(() => {
+        // Authentication successful
+        document.getElementById('loading-indicator').style.display = 'none';
+        completeAuthentication();
+    }, 2500);
+}
+
+// Complete authentication and show credentials
+function completeAuthentication() {
+    const authIcon = document.querySelector('.auth-icon i');
+    if (authIcon) {
+        authIcon.classList.remove('authenticating');
+        authIcon.classList.add('authenticated');
+    }
+    
+    // Show notification
+    showNotification('Authentication successful', 'success');
+    
+    // Hide biometric auth container and show credentials
+    setTimeout(() => {
+        biometricAuthContainer.style.display = 'none';
+        credentialsContainer.style.display = 'block';
+        
+        // Load student credentials
+        loadStudentCredentials();
+    }, 1000);
+}
+
+// Load student credentials
+function loadStudentCredentials() {
+    // In a real app, this would fetch actual credentials from Firestore
+    // For this demo, we'll display sample data
+    const credentials = [
+        {
+            id: 'cred001',
+            name: 'Bachelor of Computer Science',
+            issuer: 'MIT University',
+            issueDate: '2023-05-15',
+            type: 'degree'
+        },
+        {
+            id: 'cred002',
+            name: 'Web Development Certification',
+            issuer: 'Stanford University',
+            issueDate: '2023-08-10',
+            type: 'certificate'
+        },
+        {
+            id: 'cred003',
+            name: 'Machine Learning Specialization',
+            issuer: 'Google Academy',
+            issueDate: '2023-11-20',
+            type: 'certificate'
+        }
+    ];
+    
+    // Clear existing credentials
+    if (credentialsList) {
+        credentialsList.innerHTML = '';
+    }
+    
+    // Add credentials
+    credentials.forEach(credential => {
+        const card = document.createElement('div');
+        card.className = 'credential-card';
+        card.innerHTML = `
+            <div class="credential-header">
+                <div class="credential-icon">
+                    <i class="fas fa-${credential.type === 'degree' ? 'graduation-cap' : 'certificate'}"></i>
+                </div>
+                <div class="credential-title">
+                    <h4>${credential.name}</h4>
+                    <p>${credential.issuer}</p>
+                </div>
+            </div>
+            <div class="credential-body">
+                <div class="credential-info">
+                    <div class="info-item">
+                        <div class="info-label">Issue Date:</div>
+                        <div class="info-value">${credential.issueDate}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Type:</div>
+                        <div class="info-value">${credential.type.charAt(0).toUpperCase() + credential.type.slice(1)}</div>
+                    </div>
+                </div>
+                <div class="credential-actions">
+                    <button class="action-btn view-btn" data-id="${credential.id}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="action-btn share-btn" data-id="${credential.id}">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        if (credentialsList) {
+            credentialsList.appendChild(card);
+        }
+        
+        // Add event listeners
+        const viewBtn = card.querySelector('.view-btn');
+        const shareBtn = card.querySelector('.share-btn');
+        
+        if (viewBtn) {
+            viewBtn.addEventListener('click', () => showCredentialDetails(credential));
+        }
+        
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => shareCredential(credential));
+        }
+    });
+}
+
+// Show credential details in modal
+function showCredentialDetails(credential) {
+    // Create credential details HTML
+    const detailsHTML = `
+        <div class="certificate-details">
+            <div class="credential-header-large">
+                <div class="university-logo">
+                    <img src="img/university-logos/${credential.issuer.toLowerCase().replace(/\s+/g, '-')}.png" 
+                         onerror="this.src='img/default-university.png'" alt="${credential.issuer} Logo">
+                </div>
+                <div class="credential-title-large">
+                    <h3>${credential.name}</h3>
+                    <p>${credential.issuer}</p>
+                </div>
+            </div>
+            
+            <div class="credential-body-details">
+                <div class="student-info">
+                    <h4>Student Information</h4>
+                    <div class="info-item">
+                        <div class="info-label">Name:</div>
+                        <div class="info-value">John Smith</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Student ID:</div>
+                        <div class="info-value">S-12345678</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email:</div>
+                        <div class="info-value">john.smith@example.com</div>
+                    </div>
+                </div>
+                
+                <div class="certificate-info">
+                    <h4>Certificate Information</h4>
+                    <div class="info-item">
+                        <div class="info-label">Type:</div>
+                        <div class="info-value">${credential.type.charAt(0).toUpperCase() + credential.type.slice(1)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Issue Date:</div>
+                        <div class="info-value">${credential.issueDate}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Certificate ID:</div>
+                        <div class="info-value">${credential.id}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Blockchain Hash:</div>
+                        <div class="info-value hash-value">0x7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="certificate-verification">
+                <div class="verification-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Blockchain Verified</span>
+                </div>
+            </div>
+            
+            <div class="certificate-actions">
+                <button class="btn primary">
+                    <i class="fas fa-download"></i> Download Certificate
+                </button>
+                <button class="btn secondary share-credential-btn" data-id="${credential.id}">
+                    <i class="fas fa-share-alt"></i> Share
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Update the modal content
+    const credentialDetails = document.getElementById('credential-details');
+    if (credentialDetails) {
+        credentialDetails.innerHTML = detailsHTML;
+    }
+    
+    // Add event listener to share button
+    const shareBtn = credentialDetails.querySelector('.share-credential-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            // Hide credential modal
+            credentialModal.classList.remove('active');
+            
+            // Show share modal
+            shareCredential(credential);
+        });
+    }
+    
+    // Show the modal
+    if (credentialModal) {
+        credentialModal.classList.add('active');
+    }
+}
+
+// Share credential
+function shareCredential(credential) {
+    // Generate a sharing link
+    const sharingLink = `${window.location.origin}/verification.html?verify=${credential.id}`;
+    
+    // Create share result HTML
+    const shareHTML = `
+        <div class="sharing-options">
+            <div class="sharing-link">
+                <input type="text" value="${sharingLink}" readonly>
+                <button class="btn primary copy-link-btn">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+            
+            <div class="qr-code-container">
+                <div class="qr-code">
+                    <!-- QR code will be generated here -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(sharingLink)}" alt="QR Code">
+                </div>
+                <p>Scan this QR code to verify the credential</p>
+            </div>
+            
+            <div class="share-buttons">
+                <button class="btn share-btn" data-platform="email">
+                    <i class="fas fa-envelope"></i> Email
+                </button>
+                <button class="btn share-btn" data-platform="linkedin">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </button>
+                <button class="btn share-btn" data-platform="twitter">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Update share modal content
+    const shareResult = document.getElementById('share-result');
+    if (shareResult) {
+        shareResult.innerHTML = shareHTML;
+    }
+    
+    // Add event listeners
+    if (shareResult) {
+        // Copy link button
+        const copyBtn = shareResult.querySelector('.copy-link-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const linkInput = shareResult.querySelector('input');
+                if (linkInput) {
+                    linkInput.select();
+                    document.execCommand('copy');
+                    showNotification('Link copied to clipboard', 'success');
+                }
+            });
+        }
+        
+        // Share buttons
+        const shareButtons = shareResult.querySelectorAll('.share-btn');
+        shareButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const platform = btn.getAttribute('data-platform');
+                
+                // Simulate sharing on different platforms
+                showNotification(`Sharing via ${platform}...`, 'info');
+                
+                // In a real app, this would open the appropriate sharing dialog
+                // For demo purposes, we'll just show a notification
+                setTimeout(() => {
+                    showNotification(`Credential shared via ${platform}!`, 'success');
+                }, 1500);
+            });
+        });
+    }
+    
+    // Show the share modal
+    if (shareModal) {
+        shareModal.classList.add('active');
+    }
+}
+
+// Issue certificate (university function)
+function issueCertificate() {
+    // Get form values
+    const studentEmail = document.getElementById('student-email').value;
+    const certificateType = document.getElementById('certificate-type').value;
+    const certificateTitle = document.getElementById('certificate-title').value;
+    const issueDate = document.getElementById('issue-date').value;
+    const certificateDetails = document.getElementById('certificate-details').value;
+    
+    // Validate inputs
+    if (!studentEmail || !certificateType || !certificateTitle || !issueDate) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Show loading indicator
+    document.getElementById('loading-indicator').style.display = 'block';
+    
+    // Simulate certificate issuance
+    setTimeout(() => {
+        // Hide loading indicator
+        document.getElementById('loading-indicator').style.display = 'none';
+        
+        // Show success notification
+        showNotification('Certificate issued successfully', 'success');
+        
+        // Clear form
+        document.getElementById('student-email').value = '';
+        document.getElementById('certificate-type').value = '';
+        document.getElementById('certificate-title').value = '';
+        document.getElementById('issue-date').value = '';
+        document.getElementById('certificate-details').value = '';
+        
+        // Update stats
+        const totalIssued = document.getElementById('total-issued');
+        const activeCerts = document.getElementById('active-certs');
+        const recentActivity = document.getElementById('recent-activity');
+        
+        if (totalIssued) totalIssued.textContent = (parseInt(totalIssued.textContent) + 1).toString();
+        if (activeCerts) activeCerts.textContent = (parseInt(activeCerts.textContent) + 1).toString();
+        if (recentActivity) recentActivity.textContent = (parseInt(recentActivity.textContent) + 1).toString();
+    }, 2000);
+}
+
+// Load university stats
+function loadUniversityStats() {
+    // In a real app, these would be loaded from Firestore
+    // For demo, we'll use the values already in the HTML
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    console.log(`${type.toUpperCase()}: ${message}`);
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-icon">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        </div>
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+        </div>
+        <button class="notification-close">&times;</button>
+    `;
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Show notification with animation
+    setTimeout(() => {
+        notification.classList.add('active');
+    }, 10);
+    
+    // Add close button event
+    const closeBtn = notification.querySelector('.notification-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            notification.classList.remove('active');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        });
+    }
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('active');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
+}

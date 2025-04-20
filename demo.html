@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustChain Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e90ff;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        nav a {
+            color: #f0f0f0;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover, nav a.active {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+        
+        .role-selection {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .role-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0 10px;
+            background-color: #2a2a2a;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 180px;
+            transition: all 0.3s ease;
+            color: #f0f0f0;
+        }
+        
+        .role-btn:hover {
+            background-color: #333;
+            transform: translateY(-5px);
+        }
+        
+        .role-btn.active {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+        
+        .role-btn i {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .role-sections > div {
+            display: none;
+        }
+        
+        .role-sections > div.active {
+            display: block;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1e90ff;
+        }
+        
+        .verification-methods {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .methods-tabs {
+            display: flex;
+            border-bottom: 1px solid #444;
+            margin-bottom: 20px;
+        }
+        
+        .method-tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .method-tab i {
+            margin-right: 10px;
+        }
+        
+        .method-tab.active {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+        
+        .method-panels > div {
+            display: none;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 8px;
+        }
+        
+        .method-panels > div.active {
+            display: block;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #666;
+            padding: 50px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-zone:hover {
+            border-color: #1e90ff;
+            background-color: rgba(30, 144, 255, 0.05);
+        }
+        
+        .upload-zone i {
+            font-size: 48px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .btn-primary {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0078d7;
+        }
+        
+        .hash-input {
+            display: flex;
+            margin-top: 20px;
+        }
+        
+        .hash-input input {
+            flex: 1;
+            padding: 12px 15px;
+            background-color: #444;
+            border: 1px solid #555;
+            border-radius: 4px 0 0 4px;
+            color: #f0f0f0;
+            font-size: 16px;
+        }
+        
+        .hash-input button {
+            border-radius: 0 4px 4px 0;
+            margin-top: 0;
+        }
+        
+        .verification-process {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .verification-step {
+            display: flex;
+            align-items: center;
+            background-color: #2a2a2a;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .step-icon i {
+            font-size: 20px;
+            color: #666;
+        }
+        
+        .step-details {
+            flex: 1;
+        }
+        
+        .step-status {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-left: 15px;
+            background-color: #555;
+        }
+        
+        .verification-step.pending .step-status {
+            background-color: #555;
+        }
+        
+        .verification-step.processing .step-status {
+            background-color: #1e90ff;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .verification-step.success .step-status {
+            background-color: #4CAF50;
+        }
+        
+        .verification-step.error .step-status {
+            background-color: #F44336;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            padding: 20px;
+            border-bottom: 1px solid #444;
+            position: relative;
+        }
+        
+        .result-icon {
+            font-size: 36px;
+            margin-right: 20px;
+            color: #4CAF50;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #444;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .info-row label {
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .info-row span {
+            flex: 2;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-link"></i>
+                <span>TrustChain</span>
+            </div>
+            <nav>
+                <a href="#">Home</a>
+                <a href="#">Dashboard</a>
+                <a href="#" class="active">Verification</a>
+                <a href="#">About</a>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="role-selection">
+                <button id="universityBtn" class="role-btn">
+                    <i class="fas fa-university"></i>
+                    <span>University</span>
+                </button>
+                <button id="studentBtn" class="role-btn">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Student</span>
+                </button>
+                <button id="employerBtn" class="role-btn active">
+                    <i class="fas fa-building"></i>
+                    <span>Employer</span>
+                </button>
+            </section>
+            
+            <div class="role-sections">
+                <div id="universitySection">
+                    <div class="section-header">
+                        <h2>University Issuer Dashboard</h2>
+                        <p>Issue and manage academic credentials securely on the blockchain</p>
+                    </div>
+                    
+                    <div class="form-panel">
+                        <h3>Issue New Certificate</h3>
+                        <form id="issueForm">
+                            <div class="form-group">
+                                <label>University Name</label>
+                                <input type="text" placeholder="Enter university name">
+                            </div>
+                            <div class="form-group">
+                                <label>Student Email</label>
+                                <input type="email" placeholder="student@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Certificate Name</label>
+                                <input type="text" placeholder="Bachelor of Science">
+                            </div>
+                            <button type="button" class="btn btn-primary" id="issueCertBtn">Issue Certificate</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="studentSection">
+                    <div class="section-header">
+                        <h2>Student Credential Management</h2>
+                        <p>Access and share your academic credentials securely</p>
+                    </div>
+                    
+                    <div class="credentials-list">
+                        <div class="credential-card">
+                            <div class="credential-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="credential-details">
+                                <h4>Bachelor of Computer Science</h4>
+                                <p>Issued by: MIT University</p>
+                                <p>Date: 2023-05-15</p>
+                            </div>
+                            <div class="credential-actions">
+                                <button class="btn-view">View</button>
+                                <button class="btn-share">Share</button>
+                            </div>
+                        </div>
+                        
+                        <div class="credential-card">
+                            <div class="credential-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div class="credential-details">
+                                <h4>Web Development Certificate</h4>
+                                <p>Issued by: Stanford University</p>
+                                <p>Date: 2023-07-22</p>
+                            </div>
+                            <div class="credential-actions">
+                                <button class="btn-view">View</button>
+                                <button class="btn-share">Share</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="employerSection" class="active">
+                    <div class="section-header">
+                        <h2>Credential Verification</h2>
+                        <p>Verify academic credentials and detect fraud with blockchain technology</p>
+                    </div>
+                    
+                    <div class="verification-methods">
+                        <div class="methods-tabs">
+                            <div class="method-tab active" data-method="file">
+                                <i class="fas fa-file-upload"></i>
+                                <span>File Upload</span>
+                            </div>
+                            <div class="method-tab" data-method="qr">
+                                <i class="fas fa-qrcode"></i>
+                                <span>QR Code</span>
+                            </div>
+                            <div class="method-tab" data-method="hash">
+                                <i class="fas fa-hashtag"></i>
+                                <span>Certificate Hash</span>
+                            </div>
+                        </div>
+                        
+                        <div class="method-panels">
+                            <div id="filePanel" class="active">
+                                <h3>Upload Certificate File</h3>
+                                <div class="upload-zone" id="uploadZone">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop certificate file or click to browse</p>
+                                </div>
+                                <button class="btn btn-primary" id="verifyFileBtn">Verify Certificate</button>
+                            </div>
+                            
+                            <div id="qrPanel">
+                                <h3>Scan QR Code</h3>
+                                <div class="qr-scanner">
+                                    <div class="scanner-container">
+                                        <i class="fas fa-camera"></i>
+                                        <p>Camera access required for QR scanning</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" id="startScanBtn">Start QR Scanner</button>
+                            </div>
+                            
+                            <div id="hashPanel">
+                                <h3>Verify by Certificate Hash</h3>
+                                <p>Enter the unique hash identifier of the certificate</p>
+                                <div class="hash-input">
+                                    <input type="text" id="hashInput" placeholder="Enter certificate hash (e.g., a1b2c3d4...)">
+                                    <button class="btn btn-primary" id="verifyHashBtn">Verify</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-process" id="verificationProcess">
+                        <h3>Verification in Progress</h3>
+                        <div class="verification-steps">
+                            <div class="verification-step" id="blockchainStep">
+                                <div class="step-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="step-details">
+                                    <h4>Blockchain Verification</h4>
+                                    <p>Verifying certificate existence on the blockchain</p>
+                                </div>
+                                <div class="step-status"></div>
+                            </div>
+                            
+                            <div class="verification-step" id="integrityStep">
+                                <div class="step-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="step-details">
+                                    <h4>Integrity Check</h4>
+                                    <p>Validating certificate data integrity</p>
+                                </div>
+                                <div class="step-status"></div>
+                            </div>
+                            
+                            <div class="verification-step" id="issuerStep">
+                                <div class="step-icon">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="step-details">
+                                    <h4>Issuer Verification</h4>
+                                    <p>Confirming issuer authenticity</p>
+                                </div>
+                                <div class="step-status"></div>
+                            </div>
+                            
+                            <div class="verification-step" id="fraudStep">
+                                <div class="step-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="step-details">
+                                    <h4>Fraud Detection</h4>
+                                    <p>Running advanced fraud detection algorithms</p>
+                                </div>
+                                <div class="step-status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Verification Result Modal -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="result-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="result-text">
+                    <h3>Certificate Verified</h3>
+                    <p>This certificate is valid and authentic</p>
+                </div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="certificate-details">
+                    <div class="info-row">
+                        <label>Certificate:</label>
+                        <span id="certName">Bachelor of Science in Computer Science</span>
+                    </div>
+                    <div class="info-row">
+                        <label>Issuer:</label>
+                        <span id="certIssuer">MIT University</span>
+                    </div>
+                    <div class="info-row">
+                        <label>Student:</label>
+                        <span id="certStudent">John Smith</span>
+                    </div>
+                    <div class="info-row">
+                        <label>Issue Date:</label>
+                        <span id="certDate">2023-05-15</span>
+                    </div>
+                    <div class="info-row">
+                        <label>Blockchain Hash:</label>
+                        <span id="certHash">0x7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary">Download Certificate</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Role switching
+            const roleBtns = document.querySelectorAll('.role-btn');
+            const roleSections = document.querySelectorAll('.role-sections > div');
+            
+            roleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    roleBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+                    
+                    // Hide all sections
+                    roleSections.forEach(section => section.classList.remove('active'));
+                    
+                    // Show appropriate section
+                    let sectionId;
+                    if (btn.id === 'universityBtn') sectionId = 'universitySection';
+                    else if (btn.id === 'studentBtn') sectionId = 'studentSection';
+                    else if (btn.id === 'employerBtn') sectionId = 'employerSection';
+                    
+                    document.getElementById(sectionId).classList.add('active');
+                });
+            });
+            
+            // Method tab switching
+            const methodTabs = document.querySelectorAll('.method-tab');
+            const methodPanels = document.querySelectorAll('.method-panels > div');
+            
+            methodTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs
+                    methodTabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    tab.classList.add('active');
+                    
+                    // Hide all panels
+                    methodPanels.forEach(panel => panel.classList.remove('active'));
+                    
+                    // Show appropriate panel
+                    const method = tab.getAttribute('data-method');
+                    document.getElementById(`${method}Panel`).classList.add('active');
+                });
+            });
+            
+            // Verification process
+            const verifyFileBtn = document.getElementById('verifyFileBtn');
+            const startScanBtn = document.getElementById('startScanBtn');
+            const verifyHashBtn = document.getElementById('verifyHashBtn');
+            const verificationProcess = document.getElementById('verificationProcess');
+            const resultModal = document.getElementById('resultModal');
+            
+            // Verification steps
+            const blockchainStep = document.getElementById('blockchainStep');
+            const integrityStep = document.getElementById('integrityStep');
+            const issuerStep = document.getElementById('issuerStep');
+            const fraudStep = document.getElementById('fraudStep');
+            
+            // Process verification (for all methods)
+            function startVerification() {
+                // Show verification process
+                verificationProcess.style.display = 'block';
+                
+                // Reset all steps
+                [blockchainStep, integrityStep, issuerStep, fraudStep].forEach(step => {
+                    step.className = 'verification-step pending';
+                });
+                
+                // Start blockchain verification
+                blockchainStep.className = 'verification-step processing';
+                
+                setTimeout(() => {
+                    // Complete blockchain verification
+                    blockchainStep.className = 'verification-step success';
+                    
+                    // Start integrity check
+                    integrityStep.className = 'verification-step processing';
+                    
+                    setTimeout(() => {
+                        // Complete integrity check
+                        integrityStep.className = 'verification-step success';
+                        
+                        // Start issuer verification
+                        issuerStep.className = 'verification-step processing';
+                        
+                        setTimeout(() => {
+                            // Complete issuer verification
+                            issuerStep.className = 'verification-step success';
+                            
+                            // Start fraud detection
+                            fraudStep.className = 'verification-step processing';
+                            
+                            setTimeout(() => {
+                                // Complete fraud detection (randomly success or error)
+                                const isSuccess = Math.random() > 0.2; // 80% success rate
+                                
+                                if (isSuccess) {
+                                    fraudStep.className = 'verification-step success';
+                                    
+                                    // Show success result
+                                    setTimeout(() => {
+                                        resultModal.classList.add('active');
+                                    }, 1000);
+                                } else {
+                                    fraudStep.className = 'verification-step error';
+                                    
+                                    // Show failure result
+                                    setTimeout(() => {
+                                        document.querySelector('.result-icon i').className = 'fas fa-times-circle';
+                                        document.querySelector('.result-icon i').style.color = '#F44336';
+                                        document.querySelector('.result-text h3').textContent = 'Verification Failed';
+                                        document.querySelector('.result-text p').textContent = 'This certificate is invalid or has been tampered with.';
+                                        resultModal.classList.add('active');
+                                    }, 1000);
+                                }
+                            }, 1500);
+                        }, 1500);
+                    }, 1500);
+                }, 1500);
+            }
+            
+            // File verification
+            verifyFileBtn.addEventListener('click', startVerification);
+            
+            // QR verification
+            startScanBtn.addEventListener('click', () => {
+                alert('Scanning QR code...');
+                startVerification();
+            });
+            
+            // Hash verification
+            verifyHashBtn.addEventListener('click', () => {
+                const hashInput = document.getElementById('hashInput');
+                if (hashInput.value.trim() === '') {
+                    alert('Please enter a certificate hash');
+                    return;
+                }
+                startVerification();
+            });
+            
+            // University section
+            const issueCertBtn = document.getElementById('issueCertBtn');
+            if (issueCertBtn) {
+                issueCertBtn.addEventListener('click', () => {
+                    alert('Certificate issued successfully!');
+                });
+            }
+            
+            // Close modal
+            document.querySelector('.modal-close').addEventListener('click', () => {
+                resultModal.classList.remove('active');
+            });
+            
+            // File upload zone
+            const uploadZone = document.getElementById('uploadZone');
+            if (uploadZone) {
+                uploadZone.addEventListener('click', () => {
+                    alert('File selector would open here');
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
